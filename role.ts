@@ -18,7 +18,10 @@ export type Permissions<Action extends string, Subject extends string> = {
 };
 
 export class Role<Action extends string, Subject extends string> {
-	#permissions = new Map<`${string}:${string}`, boolean>();
+	#permissions = new Map<
+		`${/* action */ string}:${/* subject */ string}`,
+		boolean
+	>();
 	#rawPermissions: RawRole<Action, Subject>[] = [];
 
 	constructor(permissions?: RawRole<Action, Subject>[]) {
@@ -65,8 +68,10 @@ export class Role<Action extends string, Subject extends string> {
 	clone(): Role<Action, Subject> {
 		return new Role(this.getRaw());
 	}
-	extend(permissions: RawRole<Action, Subject>[]): Role<Action, Subject> {
-		return permissions.reduce<Role<Action, Subject>>(
+	extend<Xaction extends string, Xsubject extends string>(
+		permissions: RawRole<Xaction | Action, Xsubject | Subject>[],
+	): Role<Xaction | Action, Xsubject | Subject> {
+		return permissions.reduce<Role<Xaction | Action, Xsubject | Subject>>(
 			(role, [canOrCannot, action, subject]) =>
 				role.set(canOrCannot, action, subject),
 			this.clone(),
